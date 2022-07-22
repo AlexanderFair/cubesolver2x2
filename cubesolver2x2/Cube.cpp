@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <windows.h>
 using std::cout;
+using std::string;
 
 const int Cube::faceChanges[6][4] = {
 		{1, 2, 3, 4},
@@ -11,6 +12,11 @@ const int Cube::faceChanges[6][4] = {
 		{0, 3, 5, 1},
 		{1, 4, 3, 2},
 };
+const int Cube::opposites[6] = { 5, 3, 4, 1, 2, 0 };
+const int Cube::xmoveFacesChanges[6] = { 1, 5, 2, 0, 4, 3 };
+const int Cube::ymoveFacesChanges[6] = { 0, 2, 3, 4, 1, 5 };
+const int Cube::zmoveFacesChanges[6] = { 4, 1, 0, 3, 5, 2 };
+
 
 Cube::Cube() {
 	for (int i = 0; i < 8; i++) {
@@ -18,6 +24,51 @@ Cube::Cube() {
 	}
 	frontFace = 1;
 	topFace = 0;
+}
+
+Cube::Cube(Cube* c) {
+	for (int i = 0; i < 8; i++) {
+		corners[i] = Cuboid(c->corners[i]);
+	}
+	frontFace = 1;
+	topFace = 0;
+}
+
+string rotateString(string s) {
+	return "" + s.at(1) + s.at(2) + s.at(0);
+}
+
+string makeWorYFirstChar(string s) {
+	for (int i = 0; i < 2; i++) {
+		if (s.at(0) == 'w' || s.at(0) == 'y') {
+			return s;
+		}
+		s = rotateString(s);
+	}
+	cout << "There wasn't a yellow or white face on this corner! Thats bad!!\nPiece had the colours " << s << '\n';
+	return "";
+}
+
+int numOfRotates(string s) {
+	for (int i = 0; i < 2; i++) {
+		if (s.at(0) == 'w' || s.at(0) == 'y') {
+			return i;
+		}
+		s = rotateString(s);
+	}
+	cout << "There wasn't a yellow or white face on this corner! Thats bad!!\nPiece had the colours " << s << '\n';
+	return -1;
+}
+
+int getIdentityoffString(string s) {
+	string identities[7] = { "wbo", "wbr", "wrg", "wgo", "yog", "ygr", "yrb" };
+	for (int i = 0; i < 7; i++) {
+		if (s == identities[i]) {
+			return i;
+		}
+	}
+	cout << "not an acutal piece!\n";
+	return -1;
 }
 
 void printChar(char c) {
@@ -46,6 +97,89 @@ void printChar(char c) {
 	}
 	std::cout << c << ' ';
 	SetConsoleTextAttribute(hConsole, 15);
+}
+
+void printFaces(char faces[6][4]) {
+	//w 
+	for (int i = 0; i < 6; i++) {
+		std::cout << "                ";
+		printChar(faces[0][2 * (i / 3) + 0]);
+		printChar(faces[0][2 * (i / 3) + 0]);
+		printChar(faces[0][2 * (i / 3) + 0]);
+		printChar(faces[0][2 * (i / 3) + 1]);
+		printChar(faces[0][2 * (i / 3) + 1]);
+		printChar(faces[0][2 * (i / 3) + 1]);
+		std::cout << std::endl;
+	}
+	std::cout << '\n';
+	//middles
+	int midf[4] = { 4, 1, 2, 3 };
+
+	for (int i = 0; i < 6; i++) {
+		for (int f = 0; f < 4; f++) {
+			std::cout << "  ";
+			printChar(faces[midf[f]][2 * (i / 3) + 0]);
+			printChar(faces[midf[f]][2 * (i / 3) + 0]);
+			printChar(faces[midf[f]][2 * (i / 3) + 0]);
+			printChar(faces[midf[f]][2 * (i / 3) + 1]);
+			printChar(faces[midf[f]][2 * (i / 3) + 1]);
+			printChar(faces[midf[f]][2 * (i / 3) + 1]);
+		}
+		std::cout << std::endl;
+	}
+	std::cout << '\n';
+	//y
+	for (int i = 0; i < 6; i++) {
+		std::cout << "                ";
+		printChar(faces[5][2 * (i / 3) + 0]);
+		printChar(faces[5][2 * (i / 3) + 0]);
+		printChar(faces[5][2 * (i / 3) + 0]);
+		printChar(faces[5][2 * (i / 3) + 1]);
+		printChar(faces[5][2 * (i / 3) + 1]);
+		printChar(faces[5][2 * (i / 3) + 1]);
+		std::cout << std::endl;
+	}
+}
+
+Cube Cube::createCubeFromFaces() {
+	cout << "Please orientate the cube so the yellow-orange-blue corner has yellow facing down and is in the back bottom left corner of the cube\n";
+	cout << "Enter the top face in clockwise order (ex - ygob)\n";
+	std::string fc[6] = {"top", "front", "right", "back", "left", "bottom"};
+	
+	
+	char faces[6][4];
+	for (int i = 0; i < 6; i++) {
+		cout << "Enter the " << fc[i] << " face in clockwise order(ex - ygob)\n";
+		std::string s;
+		std::cin >> s;
+		faces[i][0] = s.at(0);
+		faces[i][1] = s.at(1);
+		faces[i][2] = s.at(3);
+		faces[i][3] = s.at(2);
+	}
+
+	printFaces(faces);
+
+	
+	//convert from the faces array to the cube
+	Cube c = Cube();
+	string firstCorner = "";
+	firstCorner += "" + faces[0][0] + faces[4][0] + faces[3][1];
+	string fixed = makeWorYFirstChar(firstCorner);
+	cout << firstCorner;
+	c.corners[0] = Cuboid(getIdentityoffString(fixed), numOfRotates(firstCorner));
+
+
+	return c;
+}
+
+bool Cube::isSolved(Cube c) {
+	for (int i = 0; i < 8; i++) {
+		if (c.corners[i].identity != i || c.corners[i].orientation != 0) {
+			return false;
+		}
+	}
+	return true;
 }
 
 void xRotateFaces(char faces[6][4]) {
@@ -132,9 +266,9 @@ void yRotateFaces(char faces[6][4]) {
 void zRotateFaces(char faces[6][4]) {
 	//front side
 	char temp = faces[1][0];
-	faces[1][0] = faces[1][3];
-	faces[1][3] = faces[1][2];
-	faces[1][2] = faces[1][1];
+	faces[1][0] = faces[1][2];
+	faces[1][2] = faces[1][3];
+	faces[1][3] = faces[1][1];
 	faces[1][1] = temp;
 	//back side
 	temp = faces[3][0];
@@ -168,57 +302,15 @@ void zRotateFaces(char faces[6][4]) {
 	faces[2][2] = temp;
 }
 
-void printFaces(char faces[6][4]) {
-	//w 
-	for (int i = 0; i < 6; i++) {
-		std::cout << "                ";
-		printChar(faces[0][2 * (i / 3) + 0]);
-		printChar(faces[0][2 * (i / 3) + 0]);
-		printChar(faces[0][2 * (i / 3) + 0]);
-		printChar(faces[0][2 * (i / 3) + 1]);
-		printChar(faces[0][2 * (i / 3) + 1]);
-		printChar(faces[0][2 * (i / 3) + 1]);
-		std::cout << std::endl;
-	}
-	std::cout << '\n';
-	//middles
-	int midf[4] = { 4, 1, 2, 3 };
-
-	for (int i = 0; i < 6; i++) {
-		for (int f = 0; f < 4; f++) {
-			std::cout << "  ";
-			printChar(faces[midf[f]][2 * (i / 3) + 0]);
-			printChar(faces[midf[f]][2 * (i / 3) + 0]);
-			printChar(faces[midf[f]][2 * (i / 3) + 0]);
-			printChar(faces[midf[f]][2 * (i / 3) + 1]);
-			printChar(faces[midf[f]][2 * (i / 3) + 1]);
-			printChar(faces[midf[f]][2 * (i / 3) + 1]);
-		}
-		std::cout << std::endl;
-	}
-	std::cout << '\n';
-	//y
-	for (int i = 0; i < 6; i++) {
-		std::cout << "                ";
-		printChar(faces[5][2 * (i / 3) + 0]);
-		printChar(faces[5][2 * (i / 3) + 0]);
-		printChar(faces[5][2 * (i / 3) + 0]);
-		printChar(faces[5][2 * (i / 3) + 1]);
-		printChar(faces[5][2 * (i / 3) + 1]);
-		printChar(faces[5][2 * (i / 3) + 1]);
-		std::cout << std::endl;
-	}
-}
-
 void Cube::print(Cube c) {
 	std::cout << "\n\n\n";
-
+	/*
 	cout << "Move conversions: (input - output)\n";
-	for (int i = 0; i < 18; i++) {
-		cout << i << " - " << c.moveConversions[i] << '\n';
+	for (int i = 0; i < 18; i+=3) {
+		cout << getMoveInStrForm(i) << " is now " << getMoveInStrForm(c.moveConversions[i]) << '\n';
 	}
 	cout << "\nTop Face - " << c.topFace << "\nFront Face - " << c.frontFace << "\n\n";
-
+	*/
 	char colorById[8][3] = {
 		{'w', 'b', 'o'},
 		{'w', 'r', 'b'},
@@ -229,10 +321,11 @@ void Cube::print(Cube c) {
 		{'y', 'o', 'b'},
 		{'y', 'b', 'r'},
 	};
-
+	/*
 	for (int i = 0; i < 8; i++) {
 		std::cout << int(c.corners[i].identity) << ' ' << int(c.corners[i].orientation) << std::endl;
 	}
+	*/
 
 	char faces[6][4];
 	//w
@@ -268,24 +361,26 @@ void Cube::print(Cube c) {
 	int cycle[4] = {0, 1, 5, 3};
 	int tf = 0;
 	int ff = 1;
-	cout << "starting cycle\n";
+	//cout << "before rotations\n";
+	//printFaces(faces);
+	//cout << "starting cycle\n";
 	while (cycle[tf] != c.topFace && cycle[ff] != c.frontFace) {
 		tf++;
 		tf %= 4;
 		ff++;
 		ff %= 4;
 		xRotateFaces(faces);
-		cout << "x rotating once\n";
+		//cout << "x rotating once\n";
 		//printFaces(faces);
 	}
-	cout << "done cycle\n";
+	//cout << "done cycle\n";
 
 	if (cycle[tf] == c.topFace) {
 		ff = cycle[ff];
 		while (ff != c.frontFace) {
 			ff = getNextFrontFace(cycle[tf], ff);
 			yRotateFaces(faces);
-			cout << "y rotating once\n";
+			//cout << "y rotating once\n";
 			//printFaces(faces);
 		}
 	}
@@ -294,56 +389,15 @@ void Cube::print(Cube c) {
 		while (tf != c.topFace) {
 			tf = getNextTopFace(tf, cycle[ff]);
 			zRotateFaces(faces);
-			cout << "z rotating once\n";
+			//cout << "z rotating once\n";
 			//printFaces(faces);
 		}
 	}
-
+	
+	//cout << "final print\n";
 	//print the faces	
 	//w 
-	for (int i = 0; i < 6; i++) {
-		std::cout << "                ";
-		printChar(faces[0][2 * (i / 3) + 0]);
-		printChar(faces[0][2 * (i / 3) + 0]);
-		printChar(faces[0][2 * (i / 3) + 0]);
-		printChar(faces[0][2 * (i / 3) + 1]);
-		printChar(faces[0][2 * (i / 3) + 1]);
-		printChar(faces[0][2 * (i / 3) + 1]);
-		std::cout << std::endl;
-	}
-	std::cout << '\n';
-	//middles
-	int midf[4] = { 4, 1, 2, 3 };
-
-	for (int i = 0; i < 6; i++) {
-		for (int f = 0; f < 4; f++) {
-			std::cout << "  ";
-			printChar(faces[midf[f]][2 * (i / 3) + 0]);
-			printChar(faces[midf[f]][2 * (i / 3) + 0]);
-			printChar(faces[midf[f]][2 * (i / 3) + 0]);
-			printChar(faces[midf[f]][2 * (i / 3) + 1]);
-			printChar(faces[midf[f]][2 * (i / 3) + 1]);
-			printChar(faces[midf[f]][2 * (i / 3) + 1]);
-		}
-		std::cout << std::endl;
-	}
-	std::cout << '\n';
-	//y
-	for (int i = 0; i < 6; i++) {
-		std::cout << "                ";
-		printChar(faces[5][2 * (i / 3) + 0]);
-		printChar(faces[5][2 * (i / 3) + 0]);
-		printChar(faces[5][2 * (i / 3) + 0]);
-		printChar(faces[5][2 * (i / 3) + 1]);
-		printChar(faces[5][2 * (i / 3) + 1]);
-		printChar(faces[5][2 * (i / 3) + 1]);
-		std::cout << std::endl;
-	} 
-
-	cout << "\n\n\ncalling next front face with a bunch of things\n";
-	cout << getNextFrontFace(5, 1) << ' ' << getNextFrontFace(5, 2) << ' ' << getNextFrontFace(5, 3);
-	cout << ' ' << getNextFrontFace(5, 4) << '\n';
-
+	printFaces(faces);
 }
 
 void Cube::moveFromString(Cube& c, std::string s) {
@@ -370,10 +424,55 @@ void Cube::moveFromString(Cube& c, std::string s) {
 		std::cout << "Illegal Move\n";
 		return;
 	}
-	cout << "move was " << choice << '\n';
+	//cout << "move was " << choice << '\n';
+	
 	choice = c.moveConversions[choice];
-	cout << "move now is " << choice << '\n';
+	//cout << "move now is " << choice << '\n';
 	c.move(choice);
+	//doRotationOnMove(c, choice);
+}
+
+std::string Cube::getMoveInStrForm(int n) {
+	switch (n) {
+	case 0:
+		return "U";
+	case 1:
+		return "U2";
+	case 2:
+		return "U'";
+	case 3:
+		return "F";
+	case 4:
+		return "F2";
+	case 5:
+		return "F'";
+	case 6:
+		return "R";
+	case 7:
+		return "R2";
+	case 8:
+		return "R'";
+	case 9://d
+		return "D";
+	case 10://d2
+		return "D2";
+	case 11://dp
+		return "D'";
+	case 12://b
+		return "B";
+	case 13://b2
+		return "B2";
+	case 14://bp
+		return "B'";
+	case 15://l
+		return "L";
+	case 16://l2
+		return "L2";
+	case 17://lp
+		return "L'";
+	default:
+		return  "Not a move!";
+	}
 }
 
 void Cube::move(int move) {
@@ -454,7 +553,39 @@ void Cube::move(int move) {
 		std::cout << "Illegal move" << std::endl;
 	}
 }
-
+void Cube::unmove(int move) {
+	switch (move) {
+	case 0:
+		uprime();
+		break;
+	case 1:
+		u2move();
+		break;
+	case 2:
+		umove();
+		break;
+	case 3:
+		fprime();
+		break;
+	case 4:
+		f2move();
+		break;
+	case 5:
+		fmove();
+		break;
+	case 6:
+		rprime();
+		break;
+	case 7:
+		r2move();
+		break;
+	case 8:
+		rmove();
+		break;
+	default:
+		std::cout << "Illegal move" << std::endl;
+	}
+}
 
 void Cube::rmove() {
 	corners[1].add(2);
@@ -535,6 +666,7 @@ void Cube::fprime() {
 
 
 void Cube::xmove(Cube& c) {
+	/*
 	int temp = c.moveConversions[3];
 	c.moveConversions[3] = c.moveConversions[9];
 	c.moveConversions[9] = c.moveConversions[12];
@@ -552,18 +684,56 @@ void Cube::xmove(Cube& c) {
 	c.moveConversions[11] = c.moveConversions[14];
 	c.moveConversions[14] = c.moveConversions[2];
 	c.moveConversions[2] = temp;
+	*/
 
-	cout << "in xmove\n";
-	int currentTop = c.topFace;
-	c.topFace = getNextTopFace(c.topFace, c.frontFace);
-	int nextFront = getNextTopFace(c.topFace, c.frontFace);
-	c.topFace = c.frontFace;
-	c.frontFace = nextFront;
+	//u now means f
+	//f now means d
+	//d now means b
+	//b now means u
+
+	int newConversions[18];
+	for (int i = 0; i < 18; i += 3) {
+		newConversions[i] = 0; // get rid of that warning >:(
+		switch (c.moveConversions[i]) {
+		case 0:
+			newConversions[i] = 3;
+			break;
+		case 3:
+			newConversions[i] = 9;
+			break;
+		case 6:
+			newConversions[i] = 6;
+			break;
+		case 9:
+			newConversions[i] = 12;
+			break;
+		case 12:
+			newConversions[i] = 0;
+			break;
+		case 15:
+			newConversions[i] = 15;
+			break;
+		default:
+			cout << "AHHHHHHHH smt happened in xmove that wasnt supposed to happend!!!\n";
+			cout << "Move conversions at pos " << i << " was somehow " << c.moveConversions[i] << '\n';
+		}
+		newConversions[i + 1] = newConversions[i] + 1;
+		newConversions[i + 2] = newConversions[i] + 2;
+	}
+
+	for (int i = 0; i < 18; i++) {
+		c.moveConversions[i] = newConversions[i];
+	}
+
+	c.topFace = Cube::xmoveFacesChanges[c.topFace];
+	c.frontFace = Cube::xmoveFacesChanges[c.frontFace];
 }
 void Cube::ymove(Cube& c) {
+	//cout << "called ymove\n";
+	/*
 	//f now means r
 	int temp = c.moveConversions[3];
-	c.moveConversions[3] =c. moveConversions[6];
+	c.moveConversions[3] = c.moveConversions[6];
 	c.moveConversions[6] = c.moveConversions[12];
 	c.moveConversions[12] = c.moveConversions[15];
 	c.moveConversions[15] = temp;
@@ -581,10 +751,55 @@ void Cube::ymove(Cube& c) {
 	c.moveConversions[8] = c.moveConversions[14];
 	c.moveConversions[14] = c.moveConversions[17];
 	c.moveConversions[17] = temp;
+	*/
 
-	c.frontFace = getNextFrontFace(c.topFace, c.frontFace);
+
+
+	//f now means r
+	//r now means b
+	//b now means l
+	//l now means f
+
+	int newConversions[18];
+	for (int i = 0; i < 18; i += 3) {
+		newConversions[i] = 0; // get rid of that warning >:(
+		switch (c.moveConversions[i]) {
+		case 0:
+			newConversions[i] = 0;
+			break;
+		case 3:
+			newConversions[i] = 6;
+			break;
+		case 6:
+			newConversions[i] = 12;
+			break;
+		case 9:
+			newConversions[i] = 9;
+			break;
+		case 12:
+			newConversions[i] = 15;
+			break;
+		case 15:
+			newConversions[i] = 3;
+			break;
+		default:
+			cout << "AHHHHHHHH smt happened in ymove that wasnt supposed to happend!!!\n";
+			cout << "Move conversions at pos " << i << " was somehow " << c.moveConversions[i] << '\n';
+		}
+		newConversions[i + 1] = newConversions[i] + 1;
+		newConversions[i + 2] = newConversions[i] + 2;
+	}
+
+	for (int i = 0; i < 18; i++) {
+		c.moveConversions[i] = newConversions[i];
+	}
+
+	c.topFace = Cube::ymoveFacesChanges[c.topFace];
+	c.frontFace = Cube::ymoveFacesChanges[c.frontFace];
 }
 void Cube::zmove(Cube& c) {
+	//cout << "called zmove\n";
+	/*
 	//r now means u
 	int temp = c.moveConversions[6];
 	c.moveConversions[6] = c.moveConversions[0];
@@ -603,8 +818,61 @@ void Cube::zmove(Cube& c) {
 	c.moveConversions[2] = c.moveConversions[17];
 	c.moveConversions[17] = c.moveConversions[11];
 	c.moveConversions[11] = temp;
+	*/
+	
+	//u now means l
+	//l now means d
+	//d now means r
+	//r now means u
 
-	c.topFace = getNextTopFace(c.topFace, c.frontFace);
+	int newConversions[18];
+	for (int i = 0; i < 18; i += 3) {
+		newConversions[i] = 0; // get rid of that warning >:(
+		switch (c.moveConversions[i]) {
+		case 0:
+			newConversions[i] = 15;
+			break;
+		case 3:
+			newConversions[i] = 3;
+			break;
+		case 6:
+			newConversions[i] = 0;
+			break;
+		case 9:
+			newConversions[i] = 6;
+			break;
+		case 12:
+			newConversions[i] = 12;
+			break;
+		case 15:
+			newConversions[i] = 9;
+			break;
+		default:
+			cout << "AHHHHHHHH smt happened in zmove that wasnt supposed to happend!!!\n";
+			cout << "Move conversions at pos " << i << " was somehow " << c.moveConversions[i] << '\n';
+		}
+		newConversions[i + 1] = newConversions[i] + 1;
+		newConversions[i + 2] = newConversions[i] + 2;
+	}
+
+	cout << "news\n";
+	for (int i = 0; i < 18; i++) {
+		cout << newConversions[i] << ' ';
+	}
+	cout << '\n';
+
+	for (int i = 0; i < 18; i++) {
+		c.moveConversions[i] = newConversions[i];
+	}
+
+	cout << "olds\n";
+	for (int i = 0; i < 18; i++) {
+		cout << c.moveConversions[i] << ' ';
+	}
+	cout << '\n';
+
+	c.topFace = Cube::zmoveFacesChanges[c.topFace];
+	c.frontFace = Cube::zmoveFacesChanges[c.frontFace];
 }
 
 int Cube::getNextFrontFace(int topFace, int frontFace) {

@@ -1,6 +1,8 @@
 #include "Cube.h"
+#include "Solver.h"
 #include <windows.h>
-
+using std::vector;
+using std::cout;
 
 
 void setup() {
@@ -24,14 +26,30 @@ int main() {
 	setup();
 
 	Cube cube = Cube();
-	Cube::print(cube);
+	Solver solver = Solver(cube);
 	
-	//TODO: inputting - r for r move, not having to type 6
 	std::string move;
 	while (true) {
+		Cube::print(solver.cube);
 		std::cin >> move;
-		Cube::moveFromString(cube, move);
-		Cube::print(cube);
+		if (move == "sc") {
+			solver.scramble();
+			continue;
+		}
+		else if (move == "s") {
+			solver.iterativeDeepening();
+			continue;
+		}
+		else if (move == "re") {
+			cout << "reset!\n";
+			Cube n = Cube();
+			solver.cube = n;
+		}
+		else if (move == "cc") {
+			Cube::createCubeFromFaces();
+		}
+		Cube::moveFromString(solver.cube, move);
+		
 	}
 	return 0;
 }
