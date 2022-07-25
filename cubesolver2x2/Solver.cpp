@@ -1,8 +1,10 @@
 #include "Solver.h"
+#include "Enumerator.h"
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
 #include <chrono>
+#include <fstream>
 typedef std::chrono::high_resolution_clock Clock;
 using std::cout;
 using std::vector;
@@ -130,10 +132,65 @@ void Solver::iterativeDeepening() {
 
 }
 
+void Solver::solve() {
+	vector<int> path = excatHeuristic();
+	if (path.empty()) {
+		cout << "Already solved!\n";
+	}
+	else if (path.at(0) == -1) {
+		cout << "Couldn't find a solution :(\n";
+	}
+	else {
+		cout << "Solution:\n";
+		for (int i = 0; i < path.size(); ++i) {
+			cout << Cube::getMoveInStrForm(path.at(i)) << ' ';
+		}
+		cout << "(" << path.size() << " moves)\n";
+	}
+}
 
+vector<int> Solver::excatHeuristic() {
+	auto start = Clock::now();
+	cout << "Loading files...";
+	uint8_t* minMoves;
+	minMoves = new uint8_t[3674160];
+	std::ifstream file("corners.bin", std::ios::in | std::ios::binary);
+	file.read((char*)minMoves, 3674160);
+	file.close();
+	cout << " Done (" << (float)std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now() - start).count() / 1000000000 << ")\nFinding Solution...";
 
+	vector<int> path;
+	int runs = 0;
+	while (runs < 100) {
+		++runs;
+		if (Cube::isSolved(cube)) {
+			cout << " Done (" << (float)std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now() - start).count() / 1000000000 << ")\n";
+			return path;
+		}
+		//expand cube
+		int lowestMoveAmount = 100;
+		int besti = 9;
+		for (int i = 0; i < 9; ++i) {
+			cube.move(i);
+			int index = Enumerator::indexCube(cube);
+			if (minMoves[index] == 11) {
+				Cube::print(cube);
+			}
+			if (minMoves[index] < lowestMoveAmount) {
+				besti = i;
+				lowestMoveAmount = minMoves[index];
+			}
+			cube.unmove(i);
+		}
 
+		path.push_back(besti);
+		cube.move(besti);
+	}
 
+	path.clear();
+	path.push_back(-1);
+	return path;
+}
 
 struct State {
 	Cube cube;

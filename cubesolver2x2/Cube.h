@@ -1,6 +1,6 @@
 #pragma once
 #include "Cuboid.h"
-#include <iostream>
+#include <string>
 
 
 class Cube
@@ -8,7 +8,9 @@ class Cube
 public:
 	Cube();
 	Cube(Cube* c);
+	Cube(int index);
 
+	Cuboid corners[8];
 
 	static bool isSolved(Cube c);
 	static void print(Cube c);
@@ -18,17 +20,14 @@ public:
 	static std::string getMoveInStrForm(int n);
 	static Cube createCubeFromFaces();
 
-	
-	
 private:
-	
 	int moveConversions[18] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
 	static const int faceChanges[6][4];
 	static const int opposites[6];
 	static const int xmoveFacesChanges[6];
 	static const int ymoveFacesChanges[6];
 	static const int zmoveFacesChanges[6];
-	Cuboid corners[8];
+	
 	unsigned int frontFace : 3;
 	unsigned int topFace : 3;
 

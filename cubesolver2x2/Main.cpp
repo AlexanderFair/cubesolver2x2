@@ -1,6 +1,8 @@
 #include "Cube.h"
 #include "Solver.h"
+#include "Enumerator.h"
 #include <windows.h>
+#include <iostream>
 using std::vector;
 using std::cout;
 
@@ -24,20 +26,28 @@ void setup() {
 
 int main() {
 	setup();
+	//Enumerator::enumerateStates();
 
 	Cube cube = Cube();
 	Solver solver = Solver(cube);
+
+	//Cube c2 = Cube(Enumerator::indexCube(cube));
+	//Cube::print(c2);
 	
 	std::string move;
 	while (true) {
 		Cube::print(solver.cube);
+		cout << "Legal moves are l (left), r (right), u (up), d (down), f (front), b (back)\n";
+		cout << "Add a p for prime (counter clockwise) or 2 for a half turn (ex r2)\n";
+		cout << "re for resetting the cube, s for solving, and sc for scrambling\n";
 		std::cin >> move;
 		if (move == "sc") {
 			solver.scramble();
 			continue;
 		}
 		else if (move == "s") {
-			solver.iterativeDeepening();
+			//solver.iterativeDeepening();
+			solver.solve();
 			continue;
 		}
 		else if (move == "re") {
@@ -47,6 +57,9 @@ int main() {
 		}
 		else if (move == "cc") {
 			Cube::createCubeFromFaces();
+		}
+		else if (move == "enum") {
+			Enumerator::enumerateStates();
 		}
 		Cube::moveFromString(solver.cube, move);
 		
