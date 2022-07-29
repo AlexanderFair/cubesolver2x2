@@ -2,6 +2,7 @@
 #include "Solver.h"
 #include "Enumerator.h"
 #include <windows.h>
+#include <malloc.h>
 #include <iostream>
 using std::vector;
 using std::cout;
@@ -26,6 +27,9 @@ void setup() {
 
 int main() {
 	setup();
+
+	//alright time to kill this
+	Enumerator::bruteforceLowestIndexNum();
 	//Enumerator::enumerateStates();
 
 	Cube cube = Cube();
@@ -56,7 +60,7 @@ int main() {
 			solver.cube = n;
 		}
 		else if (move == "cc") {
-			Cube::createCubeFromFaces();
+			solver.cube = Cube::createCubeFromFaces();
 		}
 		else if (move == "enum") {
 			Enumerator::enumerateStates();

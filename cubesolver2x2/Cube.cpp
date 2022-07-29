@@ -85,42 +85,36 @@ string rotateString(string s) {
 }
 
 string makeWorYFirstChar(string s) {
-	if (s.at(0) == 'w' || s.at(0) == 'y') {
-		return s;
-	}
 	for (int i = 0; i < 3; i++) {
 		if (s.at(0) == 'w' || s.at(0) == 'y') {
 			return s;
 		}
 		s = rotateString(s);
 	}
-	if (s.at(0) == 'w' || s.at(0) == 'y') {
-		return s;
-	}
 	cout << "FISR T " << s.at(0) << '\n';
-	cout << "There wasn't a yellow or white face on this corner! AHHHThats bad!!\nPiece had the colours " << s << '\n';
+	cout << "TGBHFUSIOPNJMOKHJ,PLRFVYTGIBUHONIJPMOK,LRTFUYVIGBUOHNIJPMOK[,PLhere wasn't a yellow or white face on this corner! AHHIJFEANJFJKSDBNAFLJEWHThats bad!!\nPiece had the colours " << s << '\n';
 	return "";
 }
 
 int numOfRotates(string s) {
-	for (int i = 0; i < 2; i++) {
+	for (int i = 0; i < 3; i++) {
 		if (s.at(0) == 'w' || s.at(0) == 'y') {
 			return i;
 		}
 		s = rotateString(s);
 	}
-	cout << "There wasn't a yellow or white face on this corner! Thats bad!!\nPiece had the colours " << s << '\n';
+	cout << "There wasn't a yellow or white face on this corner! Thats bad!! (num rotates)\nPiece had the colours " << s << '\n';
 	return -1;
 }
 
 int getIdentityoffString(string s) {
-	string identities[7] = { "wob", "wrb", "wgr", "wog", "ygo", "yrg", "ybr" };
-	for (int i = 0; i < 7; i++) {
+	string identities[8] = { "wob", "wbr", "wgo", "wrg", "yog", "ygr", "ybo", "yrb" };
+	for (int i = 0; i < 8; i++) {
 		if (s == identities[i]) {
 			return i;
 		}
 	}
-	cout << "not an acutal piece!\n";
+	cout << "not an acutal piece! s was " << s << "\n";
 	return -1;
 }
 string swapLastTwo(string s) {
@@ -201,7 +195,7 @@ void printFaces(char faces[6][4]) {
 
 Cube Cube::createCubeFromFaces() {
 	cout << "Please orientate the cube so the yellow-orange-blue corner has yellow facing down and is in the back bottom left corner of the cube\n";
-	cout << "Enter the top face in clockwise order (ex - ygob)\n";
+	//cout << "Enter the top face in clockwise order (ex - ygob)\n";
 	std::string fc[6] = {"top", "front", "right", "back", "left", "bottom"};
 	
 	
@@ -222,7 +216,7 @@ Cube Cube::createCubeFromFaces() {
 		{'y', 'y', 'y', 'y',},
 	};*/
 	for (int i = 0; i < 6; i++) {
-		/*
+		
 		cout << "Enter the " << fc[i] << " face in clockwise order(ex - ygob)\n";
 		std::string s;
 		std::cin >> s;
@@ -230,7 +224,7 @@ Cube Cube::createCubeFromFaces() {
 		faces[i][1] = s.at(1);
 		faces[i][2] = s.at(3);
 		faces[i][3] = s.at(2);
-		*/
+		
 	}
 
 	printFaces(faces);
@@ -244,6 +238,7 @@ Cube Cube::createCubeFromFaces() {
 	firstCorner += faces[3][1];
 	cout << firstCorner << " was first c\n";
 	string fixed = makeWorYFirstChar(firstCorner);
+	cout << "fixed: " << fixed << '\n';
 	
 	c.corners[0] = Cuboid(getIdentityoffString(fixed), numOfRotates(firstCorner));
 	cout << "corner done 1\n";

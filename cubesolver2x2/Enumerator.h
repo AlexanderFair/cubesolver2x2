@@ -6,6 +6,7 @@ class Enumerator
 public:
 	static void enumerateStates();
 	static int indexCube(Cube c);
+	static int bruteforceLowestIndexNum();
 private:
 	
 };

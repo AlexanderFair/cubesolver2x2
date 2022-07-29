@@ -8,6 +8,7 @@
 typedef std::chrono::high_resolution_clock Clock;
 using std::cout;
 using std::vector;
+int totalVisited = 0;
 
 
 Solver::Solver(Cube c) {
@@ -43,6 +44,7 @@ void Solver::scramble() {
 }
 
 vector<int> Solver::dfs(vector<int> path, int movesLeft) {
+	++totalVisited;
 	//cout << movesLeft << '\n';
 	//Cube::print(cube);
 	if (movesLeft == 0) {
@@ -96,6 +98,7 @@ void Solver::iterativeDeepening() {
 	auto totalStart = Clock::now();
 	vector<int> r;
 	for (int d = 1; d <= maxDepth; d++) {
+		totalVisited = 0;
 		auto iterStart = Clock::now();
 		vector<int> e;
 		for (int i = 0; i < 9; i++) {
@@ -114,8 +117,11 @@ void Solver::iterativeDeepening() {
 		if (!r.empty()) {
 			break;
 		}
+		auto iterEnd = Clock::now();
 		cout << "Couldn't find a solution with a depth of " << d;
-		cout << " (took " << (float)std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now() - iterStart).count() / 1000000000 << " seconds)";
+		cout << " visited " << totalVisited << " states with ";
+		cout << (float)totalVisited / ((float)std::chrono::duration_cast<std::chrono::nanoseconds>(iterEnd - iterStart).count() / 1000000000) << " sps";
+		cout << " (took " << (float)std::chrono::duration_cast<std::chrono::nanoseconds>(iterEnd - iterStart).count() / 1000000000 << " seconds)";
 		cout << ", increasing depth...\n";
 	}
 
@@ -133,6 +139,8 @@ void Solver::iterativeDeepening() {
 }
 
 void Solver::solve() {
+	//iterativeDeepening();
+
 	vector<int> path = excatHeuristic();
 	if (path.empty()) {
 		cout << "Already solved!\n";
@@ -173,9 +181,6 @@ vector<int> Solver::excatHeuristic() {
 		for (int i = 0; i < 9; ++i) {
 			cube.move(i);
 			int index = Enumerator::indexCube(cube);
-			if (minMoves[index] == 11) {
-				Cube::print(cube);
-			}
 			if (minMoves[index] < lowestMoveAmount) {
 				besti = i;
 				lowestMoveAmount = minMoves[index];
