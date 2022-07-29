@@ -285,7 +285,7 @@ int Enumerator::bruteforceLowestIndexNum() {
 	//getLowestIndex(allNums);
 	
 	vector<int> empty;
-	for (int i = 0; i <= 4488; ++i) {
+	for (int i = 0; i <= 28783; ++i) {
 		used[i] = false;
 	}
 	cout << "Starting...\n";
@@ -296,14 +296,27 @@ int Enumerator::bruteforceLowestIndexNum() {
 	printTime(start, end);
 	cout << " seconds\nLowest index using only rotations is " << largestIndex;
 	int count = 0;
-	for (int i = 0; i <= 4488; ++i) {
+	for (int i = 0; i <= 28783; ++i) {
 		if (!used[i]) {
 			++count;
 		}
 	}
 	cout << "\nThere are " << count << " unused slots!\n";
+	cout << "chains!\n";
+	int x = 0;
+	while (x <= 28783) {
+		if (!used[x]) {
+			int len = 0;
+			while (x <= 28783 && !used[x]) {
+				++len;
+				++x;
+			}
+			cout << "Chain was " << len << " long!\n";
+		}
+		x++;
+	}
 	std::ofstream out;
-	out.open("rotationLowestIndex");
+	out.open("rotationLowestIndex.txt");
 	out << largestIndex;
 	out.close();
 	
